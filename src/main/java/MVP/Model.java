@@ -13,6 +13,16 @@ public class Model {
     private List<Toy> toy_list;
     private List<String> prize_pull;
 
+    @Override
+    public String toString() {
+        String res = "";
+        for (Toy toy : toy_list) {
+            res += String.format("Имя: %s, Колличество: %d, Шанс выйгрыша: %f", toy.getName(), toy.getQuantity(), toy.getProbability());
+            res += "\n";
+        }
+        return res;
+    }
+
     public List<String> getPrize_pull() {
         return prize_pull;
     }
@@ -30,63 +40,79 @@ public class Model {
     }
 
     public Model() {
-        toy_list = new ArrayList<Toy>();
-        prize_pull = new ArrayList<String>();
+        toy_list = new ArrayList<>();
+        prize_pull = new ArrayList<>();
     }
 
-    public void add_toy_to_list(Toy toy) {
+    public Model(List<Toy> toy_list) {
+        this.toy_list = toy_list;
+        prize_pull = new ArrayList<>();
+    }
+
+    public boolean add_toy_to_list(Toy toy) {
         toy_list.add(toy);
+        return true;
     }
 
-    public Toy hold_a_draw() {
+    public Toy hold_a_draw(List<Toy> toy_list) {
         Random random = new Random();
+        float[] weigh_list = new float[toy_list.size()];
         float weights_sum = 0;
-        int index_prize_toy = 0;
-        float[] weigth_list = new float[toy_list.size()];
-        for (int i = 0; i < toy_list.size() - 1; i++) {
-            weigth_list[i] = toy_list.get(i).getProbability() * toy_list.get(i).getQuantity();
-            weights_sum += weigth_list[i];
+        for (int i = 0; i < toy_list.size(); i++) {
+            float weight = toy_list.get(i).getProbability() * toy_list.get(i).getQuantity();
+            weights_sum += weight;
+            weigh_list[i] = weights_sum;
         }
 
-        float token = random.nextFloat(weights_sum);
+        float token = random.nextFloat(0, weights_sum);
 
-        for (int i = 1; i < weigth_list.length - 1; i++) {
-            if (token <= weigth_list[i] && token > weigth_list[i - 1]) {
-                index_prize_toy = i;
+        for (int i = 0; i < weigh_list.length; i++) {
+            if (token <= weigh_list[i]) {
+                return toy_list.get(i);
             }
         }
 
-        return toy_list.get(index_prize_toy);
+        return null;
     }
 
-    public void set_new_probability(String[] name_and_new_probability) {
+    public boolean set_new_probability(String[] name_and_new_probability) {
         String name = name_and_new_probability[0];
         float new_probability = Float.parseFloat(name_and_new_probability[1]);
         for (Toy toy : toy_list) {
             if (toy.getName().equals(name))
                 toy.setProbability(new_probability);
         }
+        return true;
     }
 
-    public void add_to_prize_pull(Toy toy) {
+    public String add_to_prize_pull(Toy toy) {
         toy.setQuantity(toy.getQuantity() - 1);
+        delete_zero_quantity_toy(toy_list);
         prize_pull.add(toy.getName());
+        return toy.toString();
     }
 
     public boolean add_prize_to_database(String chosen_prize) {
         for (String prize : prize_pull) {
             if (prize.equals(chosen_prize)) {
                 try {
-                    BufferedWriter bw = new BufferedWriter(new FileWriter("src/main/java/Prize_database/Database.txt", true));
+                    BufferedWriter bw = new BufferedWriter(new FileWriter(
+                            "src/main/java/Prize_database/Database.txt", true));
                     bw.write(prize);
                     bw.newLine();
+                    bw.close();
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 }
-                prize_pull.remove(prize);
+
+                prize_pull.remove(chosen_prize);
+                return true;
             }
-            else return false;
         }
-        return true;
+        return false;
+    }
+
+    private void delete_zero_quantity_toy(List<Toy> toy_list) {
+        toy_list.removeIf(toy -> toy.getQuantity() <= 0);
     }
 }

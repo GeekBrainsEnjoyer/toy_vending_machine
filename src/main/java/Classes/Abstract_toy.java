@@ -1,20 +1,21 @@
 package Classes;
 
 public abstract class Abstract_toy {
-    private String id;
+    protected int id = 0;
     private String name;
 
-    public Abstract_toy(String id, String name) {
-        this.id = id;
+    @Override
+    public String toString() {
+        return name;
+    }
+
+    public Abstract_toy(String name) {
+        this.id += 1;
         this.name = name;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getName() {

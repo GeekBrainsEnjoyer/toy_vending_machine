@@ -4,8 +4,8 @@ public class Toy extends Abstract_toy {
     private int quantity;
     private float probability;
 
-    public Toy(String id, String name, int quantity, float probability) {
-        super(id, name);
+    public Toy(String name, int quantity, float probability) {
+        super(name);
         this.probability = probability;
         this.quantity = quantity;
     }
